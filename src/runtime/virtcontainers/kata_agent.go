@@ -1400,7 +1400,7 @@ func (k *kataAgent) createContainer(ctx context.Context, sandbox *Sandbox, c *Co
 
 	sharedPidNs := k.handlePidNamespace(grpcSpec, sandbox)
 
-	passSeccomp := !sandbox.config.DisableGuestSeccomp && sandbox.seccompSupported
+	passSeccomp := !sandbox.config.DisableGuestSeccomp
 
 	// We need to constraint the spec to make sure we're not passing
 	// irrelevant information to the agent.
