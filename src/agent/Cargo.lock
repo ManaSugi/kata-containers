@@ -577,6 +577,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "libseccomp"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "444b423ba070a576e782f1e4adaa74c7d858e2a9b94ca1211fd5280a89034458"
+dependencies = [
+ "libc",
+ "libseccomp-sys",
+ "nix 0.17.0",
+ "pkg-config",
+]
+
+[[package]]
+name = "libseccomp-sys"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "539912de229a4fc16e507e8df12a394038a524a5b5b6c92045ad344472aac475"
+
+[[package]]
 name = "lock_api"
 version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -968,6 +986,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 
 [[package]]
+name = "pkg-config"
+version = "0.3.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3831453b3449ceb48b6d9c7ad7c96d5ea673e9b470a1dc578c2ce6521230884c"
+
+[[package]]
 name = "ppv-lite86"
 version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1273,6 +1297,7 @@ dependencies = [
  "inotify",
  "lazy_static",
  "libc",
+ "libseccomp",
  "nix 0.17.0",
  "oci",
  "path-absolutize",

@@ -579,15 +579,13 @@ EOT
 
 		agent_pkg="${RUST_AGENT_PKG}"
 		agent_dir="${script_dir}/../../../src/agent/"
-		# For now, rust-agent doesn't support seccomp yet.
-		SECCOMP="no"
 
 		info "Build agent"
 		pushd "${agent_dir}"
 		[ -n "${AGENT_VERSION}" ] && git checkout "${AGENT_VERSION}" && OK "git checkout successful" || info "checkout failed!"
 		make clean
-		make LIBC=${LIBC} INIT=${AGENT_INIT}
-		make install DESTDIR="${ROOTFS_DIR}" LIBC=${LIBC} INIT=${AGENT_INIT} SECCOMP=${SECCOMP}
+		make LIBC=${LIBC} INIT=${AGENT_INIT} SECCOMP=${SECCOMP}
+		make install DESTDIR="${ROOTFS_DIR}" LIBC=${LIBC} INIT=${AGENT_INIT}
 		[ "$ARCH" == "aarch64" ] && export PATH=$OLD_PATH && rm -rf /usr/local/musl
 		popd
 	else
