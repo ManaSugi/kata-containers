@@ -4,14 +4,10 @@
 //
 
 use anyhow::{anyhow, Result};
-use oci::LinuxSeccomp;
-
-#[cfg(feature = "seccomp")]
 use libseccomp::*;
-#[cfg(feature = "seccomp")]
+use oci::LinuxSeccomp;
 use std::str::FromStr;
 
-#[cfg(feature = "seccomp")]
 pub fn get_filter_attr_from_flag(flag: &str) -> Result<ScmpFilterAttr> {
     match flag {
         "SECCOMP_FILTER_FLAG_TSYNC" => Ok(ScmpFilterAttr::CtlTsync),
@@ -23,7 +19,6 @@ pub fn get_filter_attr_from_flag(flag: &str) -> Result<ScmpFilterAttr> {
 
 // init_seccomp creates a seccomp filter and loads it for the current process
 // including all the child processes.
-#[cfg(feature = "seccomp")]
 pub fn init_seccomp(scmp: &LinuxSeccomp) -> Result<()> {
     let def_action = ScmpAction::from_str(scmp.default_action.as_str(), Some(libc::EPERM as u32))?;
 
@@ -88,9 +83,4 @@ pub fn init_seccomp(scmp: &LinuxSeccomp) -> Result<()> {
     filter.load()?;
 
     Ok(())
-}
-
-#[cfg(not(feature = "seccomp"))]
-pub fn init_seccomp(_scmp: &LinuxSeccomp) -> Result<()> {
-    Err(anyhow!("Seccomp config provided but seccomp not supported"))
 }

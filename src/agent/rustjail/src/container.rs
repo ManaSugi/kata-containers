@@ -25,6 +25,7 @@ use crate::cgroups::mock::Manager as FsManager;
 use crate::cgroups::Manager;
 use crate::log_child;
 use crate::process::Process;
+#[cfg(feature = "seccomp")]
 use crate::seccomp;
 use crate::specconv::CreateOpts;
 use crate::{mount, validator};
@@ -609,9 +610,11 @@ fn do_init_child(cwfd: RawFd) -> Result<()> {
     // Without NoNewPrivileges, we need to set seccomp
     // before dropping capabilities because the calling thread
     // must have the CAP_SYS_ADMIN.
-    if linux.seccomp.is_some() && !oci_process.no_new_privileges {
-        let scmp = linux.seccomp.as_ref().unwrap();
-        seccomp::init_seccomp(scmp)?;
+    #[cfg(feature = "seccomp")]
+    if !oci_process.no_new_privileges {
+        if let Some(ref scmp) = linux.seccomp {
+            seccomp::init_seccomp(scmp)?;
+        }
     }
 
     // Drop capabilities
@@ -689,9 +692,11 @@ fn do_init_child(cwfd: RawFd) -> Result<()> {
     // With NoNewPrivileges, we should set seccomp as close to
     // do_exec as possible in order to reduce the amount of
     // system calls in the seccomp profiles.
-    if linux.seccomp.is_some() && oci_process.no_new_privileges {
-        let scmp = linux.seccomp.as_ref().unwrap();
-        seccomp::init_seccomp(scmp)?;
+    #[cfg(feature = "seccomp")]
+    if oci_process.no_new_privileges {
+        if let Some(ref scmp) = linux.seccomp {
+            seccomp::init_seccomp(scmp)?;
+        }
     }
 
     do_exec(&args);
