@@ -31,8 +31,9 @@ export VERSION_COMMIT := $(if $(COMMIT),$(VERSION)-$(COMMIT),$(VERSION))
 SECCOMP := no
 
 # Enable seccomp feature of rust build
+SECCOMP_FEATURE :=
 ifeq ($(SECCOMP),yes)
-    override SECCOMP_FEATURES := --features rustjail/seccomp
+    override SECCOMP_FEATURE := --features rustjail/seccomp
 endif
 
 ##VAR BUILD_TYPE=release|debug type of rust build
@@ -131,14 +132,14 @@ default: $(TARGET) show-header
 $(TARGET): $(GENERATED_CODE) $(TARGET_PATH)
 
 $(TARGET_PATH): $(SOURCES) | show-summary
-	@RUSTFLAGS="$(EXTRA_RUSTFLAGS) --deny warnings" cargo build --target $(TRIPLE) --$(BUILD_TYPE) $(SECCOMP_FEATURES)
+	@RUSTFLAGS="$(EXTRA_RUSTFLAGS) --deny warnings" cargo build --target $(TRIPLE) --$(BUILD_TYPE) $(SECCOMP_FEATURE)
 
 $(GENERATED_FILES): %: %.in
 	@sed $(foreach r,$(GENERATED_REPLACEMENTS),-e 's|@$r@|$($r)|g') "$<" > "$@"
 
 ##TARGET optimize: optimized  build
 optimize: $(SOURCES) | show-summary show-header
-	@RUSTFLAGS="-C link-arg=-s $(EXTRA_RUSTFLAGS) --deny-warnings" cargo build --target $(TRIPLE) --$(BUILD_TYPE) $(SECCOMP_FEATURES)
+	@RUSTFLAGS="-C link-arg=-s $(EXTRA_RUSTFLAGS) --deny-warnings" cargo build --target $(TRIPLE) --$(BUILD_TYPE) $(SECCOMP_FEATURE)
 
 ##TARGET clippy: run clippy linter
 clippy: $(GENERATED_CODE)
