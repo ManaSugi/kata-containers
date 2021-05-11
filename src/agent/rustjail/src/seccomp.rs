@@ -84,3 +84,135 @@ pub fn init_seccomp(scmp: &LinuxSeccomp) -> Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::skip_if_not_root;
+    use libc::{dup2, process_vm_readv, EPERM};
+    use std::io::Error;
+    use std::ptr::null;
+
+    macro_rules! syscall_assert {
+        ($e1: expr, $e2: expr) => {
+            let mut errno: i32 = 0;
+            if $e1 < 0 {
+                errno = -Error::last_os_error().raw_os_error().unwrap();
+            }
+            assert_eq!(errno, $e2);
+        };
+    }
+
+    #[test]
+    fn test_get_filter_attr_from_flag() {
+        skip_if_not_root!();
+
+        assert_eq!(
+            get_filter_attr_from_flag("SECCOMP_FILTER_FLAG_TSYNC").unwrap(),
+            ScmpFilterAttr::CtlTsync
+        );
+
+        assert_eq!(get_filter_attr_from_flag("ERROR").is_err(), true);
+    }
+
+    #[test]
+    fn test_init_seccomp() {
+        skip_if_not_root!();
+
+        let data = r#"{
+            "defaultAction": "SCMP_ACT_ALLOW",
+            "architectures": [
+                "SCMP_ARCH_X86",
+                "SCMP_ARCH_X32",
+                "SCMP_ARCH_X86_64",
+                "SCMP_ARCH_AARCH64",
+                "SCMP_ARCH_ARM"
+            ],
+            "flags": [
+                "SECCOMP_FILTER_FLAG_LOG"
+            ],
+            "syscalls": [
+                {
+                   "names": [
+                        "dup2"
+                    ],
+                    "action": "SCMP_ACT_ERRNO"
+                },
+                {
+                   "names": [
+                        "process_vm_readv"
+                    ],
+                    "action": "SCMP_ACT_ERRNO",
+                    "errnoRet": 111,
+                    "args": [
+                        {
+                            "index": 0,
+                            "value": 10,
+                            "op": "SCMP_CMP_EQ"
+                        }
+                    ]
+                },
+                {
+                   "names": [
+                        "process_vm_readv"
+                    ],
+                    "action": "SCMP_ACT_ERRNO",
+                    "errnoRet": 111,
+                    "args": [
+                        {
+                            "index": 0,
+                            "value": 20,
+                            "op": "SCMP_CMP_EQ"
+                        }
+                    ]
+                },
+                {
+                   "names": [
+                        "process_vm_readv"
+                    ],
+                    "action": "SCMP_ACT_ERRNO",
+                    "errnoRet": 222,
+                    "args": [
+                        {
+                            "index": 0,
+                            "value": 30,
+                            "op": "SCMP_CMP_EQ"
+                        },
+                        {
+                            "index": 2,
+                            "value": 40,
+                            "op": "SCMP_CMP_EQ"
+                        }
+                    ]
+                }
+            ]
+        }"#;
+
+        let scmp: oci::LinuxSeccomp = serde_json::from_str(data).unwrap();
+
+        init_seccomp(&scmp).unwrap();
+
+        // Basic syscall with simple rule
+        syscall_assert!(unsafe { dup2(0, 1) }, -EPERM);
+
+        // Syscall with permitted arguments
+        syscall_assert!(unsafe { process_vm_readv(1, null(), 0, null(), 0, 0) }, 0);
+
+        // Multiple arguments with OR rules with ERRNO
+        syscall_assert!(
+            unsafe { process_vm_readv(10, null(), 0, null(), 0, 0) },
+            -111
+        );
+        syscall_assert!(
+            unsafe { process_vm_readv(20, null(), 0, null(), 0, 0) },
+            -111
+        );
+
+        // Multiple arguments with AND rules with ERRNO
+        syscall_assert!(unsafe { process_vm_readv(30, null(), 0, null(), 0, 0) }, 0);
+        syscall_assert!(
+            unsafe { process_vm_readv(30, null(), 40, null(), 0, 0) },
+            -222
+        );
+    }
+}

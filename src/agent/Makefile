@@ -164,7 +164,7 @@ clean:
 
 #TARGET test: run cargo tests
 test:
-	@cargo test --all --target $(TRIPLE)
+	@cargo test --all --target $(TRIPLE) $(SECCOMP_FEATURE)
 
 ##TARGET check: run test
 check: clippy format
