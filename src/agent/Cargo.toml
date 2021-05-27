@@ -67,3 +67,6 @@ members = [
 
 [profile.release]
 lto = true
+
+[features]
+seccomp = ["rustjail/seccomp"]

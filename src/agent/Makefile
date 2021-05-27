@@ -33,7 +33,7 @@ SECCOMP := no
 # Enable seccomp feature of rust build
 SECCOMP_FEATURE :=
 ifeq ($(SECCOMP),yes)
-    override SECCOMP_FEATURE := --features rustjail/seccomp
+    override SECCOMP_FEATURE := --features seccomp
 endif
 
 ##VAR BUILD_TYPE=release|debug type of rust build
