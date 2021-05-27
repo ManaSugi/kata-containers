@@ -190,6 +190,7 @@ type Sandbox struct {
 
 	shmSize           uint64
 	sharePidNs        bool
+	seccompSupported  bool
 	disableVMShutdown bool
 
 	cgroupMgr *vccgroups.Manager
@@ -428,6 +429,9 @@ func (s *Sandbox) getAndStoreGuestDetails(ctx context.Context) error {
 
 	if guestDetailRes != nil {
 		s.state.GuestMemoryBlockSizeMB = uint32(guestDetailRes.MemBlockSizeBytes >> 20)
+		if guestDetailRes.AgentDetails != nil {
+			s.seccompSupported = guestDetailRes.AgentDetails.SupportsSeccomp
+		}
 		s.state.GuestMemoryHotplugProbe = guestDetailRes.SupportMemHotplugProbe
 	}
 

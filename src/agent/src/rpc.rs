@@ -1217,7 +1217,7 @@ fn get_agent_details() -> AgentDetails {
     let mut detail = AgentDetails::new();
 
     detail.set_version(AGENT_VERSION.to_string());
-
+    detail.set_supports_seccomp(false);
     detail.init_daemon = unistd::getpid() == Pid::from_raw(1);
 
     detail.device_handlers = RepeatedField::new();
