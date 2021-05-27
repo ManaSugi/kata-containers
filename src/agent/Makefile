@@ -28,7 +28,7 @@ COMMIT_MSG = $(if $(COMMIT),$(COMMIT),unknown)
 export VERSION_COMMIT := $(if $(COMMIT),$(VERSION)-$(COMMIT),$(VERSION))
 
 ##VAR SECCOMP=yes|no define if agent enables seccomp feature
-SECCOMP := no
+SECCOMP := yes
 
 # Enable seccomp feature of rust build
 SECCOMP_FEATURE :=
