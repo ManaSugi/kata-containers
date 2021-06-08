@@ -1213,7 +1213,7 @@ fn get_memory_info(block_size: bool, hotplug: bool) -> Result<(u64, bool)> {
     Ok((size, plug))
 }
 
-fn have_seccomp() -> bool {
+pub fn have_seccomp() -> bool {
     if cfg!(feature = "seccomp") {
         return true;
     }
