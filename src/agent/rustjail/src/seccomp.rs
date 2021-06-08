@@ -122,11 +122,6 @@ mod tests {
         let data = r#"{
             "defaultAction": "SCMP_ACT_ALLOW",
             "architectures": [
-                "SCMP_ARCH_X86",
-                "SCMP_ARCH_X32",
-                "SCMP_ARCH_X86_64",
-                "SCMP_ARCH_AARCH64",
-                "SCMP_ARCH_ARM"
             ],
             "flags": [
                 "SECCOMP_FILTER_FLAG_LOG"
@@ -188,7 +183,25 @@ mod tests {
             ]
         }"#;
 
-        let scmp: oci::LinuxSeccomp = serde_json::from_str(data).unwrap();
+        let mut scmp: oci::LinuxSeccomp = serde_json::from_str(data).unwrap();
+        let mut arch: Vec<oci::Arch>;
+
+        if cfg!(target_endian = "little") {
+            // For little-endian architectures
+            arch = vec![
+                "SCMP_ARCH_X86".to_string(),
+                "SCMP_ARCH_X32".to_string(),
+                "SCMP_ARCH_X86_64".to_string(),
+                "SCMP_ARCH_AARCH64".to_string(),
+                "SCMP_ARCH_ARM".to_string(),
+                "SCMP_ARCH_PPC64LE".to_string(),
+            ];
+        } else {
+            // For big-endian architectures
+            arch = vec!["SCMP_ARCH_S390X".to_string()];
+        }
+
+        scmp.architectures.append(&mut arch);
 
         init_seccomp(&scmp).unwrap();
 
