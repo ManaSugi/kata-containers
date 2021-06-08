@@ -579,7 +579,8 @@ EOT
 
 		agent_pkg="${RUST_AGENT_PKG}"
 		agent_dir="${script_dir}/../../../src/agent/"
-		# The kata agent enables seccomp by default.
+		# The kata agent enables seccomp feature.
+		# However, it is not enforced by default: you need to enable that in the main configuration file.
 		SECCOMP="yes"
 
 		info "Build agent"
