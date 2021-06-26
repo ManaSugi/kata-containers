@@ -582,6 +582,7 @@ EOT
 		# The kata agent enables seccomp feature.
 		# However, it is not enforced by default: you need to enable that in the main configuration file.
 		SECCOMP="yes"
+		bash ${script_dir}/../../../ci/install_libseccomp.sh
 
 		info "Build agent"
 		pushd "${agent_dir}"
