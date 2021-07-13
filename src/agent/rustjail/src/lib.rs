@@ -28,6 +28,8 @@ extern crate oci;
 extern crate path_absolutize;
 extern crate regex;
 
+#[cfg(feature = "apparmor")]
+pub mod apparmor;
 pub mod capabilities;
 pub mod cgroups;
 pub mod container;

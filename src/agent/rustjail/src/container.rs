@@ -17,6 +17,7 @@ use std::time::SystemTime;
 
 use cgroups::freezer::FreezerState;
 
+use crate::apparmor;
 use crate::capabilities;
 #[cfg(not(test))]
 use crate::cgroups::fs::Manager as FsManager;
@@ -601,6 +602,11 @@ fn do_init_child(cwfd: RawFd) -> Result<()> {
     if oci_process.capabilities.is_some() {
         let c = oci_process.capabilities.as_ref().unwrap();
         capabilities::drop_privileges(cfd_log, c)?;
+    }
+
+    #[cfg(feature = "apparmor")]
+    if !oci_process.apparmor_profile.is_empty() {
+        apparmor::init_apparmor(&oci_process.apparmor_profile)?;
     }
 
     if init {

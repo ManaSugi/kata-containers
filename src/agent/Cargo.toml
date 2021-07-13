@@ -69,3 +69,6 @@ members = [
 
 [profile.release]
 lto = true
+
+[features]
+apparmor = ["rustjail/apparmor"]

@@ -27,6 +27,20 @@ COMMIT_MSG = $(if $(COMMIT),$(COMMIT),unknown)
 # Exported to allow cargo to see it
 export VERSION_COMMIT := $(if $(COMMIT),$(VERSION)-$(COMMIT),$(VERSION))
 
+EXTRA_RUSTFEATURES :=
+
+##VAR APPARMOR=yes|no define if agent enables AppArmor feature
+APPARMOR := no
+
+# Enable AppArmor feature of rust build
+ifeq ($(APPARMOR),yes)
+    override EXTRA_RUSTFEATURES += apparmor
+endif
+
+ifneq ($(EXTRA_RUSTFEATURES),)
+    override EXTRA_RUSTFEATURES := --features $(EXTRA_RUSTFEATURES)
+endif
+
 ##VAR BUILD_TYPE=release|debug type of rust build
 BUILD_TYPE = release
 
@@ -123,14 +137,14 @@ default: $(TARGET) show-header
 $(TARGET): $(GENERATED_CODE) $(TARGET_PATH)
 
 $(TARGET_PATH): $(SOURCES) | show-summary
-	@RUSTFLAGS="$(EXTRA_RUSTFLAGS) --deny warnings" cargo build --target $(TRIPLE) --$(BUILD_TYPE)
+	@RUSTFLAGS="$(EXTRA_RUSTFLAGS) --deny warnings" cargo build --target $(TRIPLE) --$(BUILD_TYPE) $(EXTRA_RUSTFEATURES)
 
 $(GENERATED_FILES): %: %.in
 	@sed $(foreach r,$(GENERATED_REPLACEMENTS),-e 's|@$r@|$($r)|g') "$<" > "$@"
 
 ##TARGET optimize: optimized  build
 optimize: $(SOURCES) | show-summary show-header
-	@RUSTFLAGS="-C link-arg=-s $(EXTRA_RUSTFLAGS) --deny-warnings" cargo build --target $(TRIPLE) --$(BUILD_TYPE)
+	@RUSTFLAGS="-C link-arg=-s $(EXTRA_RUSTFLAGS) --deny-warnings" cargo build --target $(TRIPLE) --$(BUILD_TYPE) $(EXTRA_RUSTFEATURES)
 
 
 ##TARGET clippy: run clippy linter
@@ -156,7 +170,7 @@ clean:
 
 #TARGET test: run cargo tests
 test:
-	@cargo test --all --target $(TRIPLE)
+	@cargo test --all --target $(TRIPLE) $(EXTRA_RUSTFEATURES)
 
 ##TARGET check: run test
 check: clippy format

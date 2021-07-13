@@ -31,3 +31,4 @@ INIT_PROCESS=systemd
 ARCH_EXCLUDE_LIST=()
 
 [ "$SECCOMP" = "yes" ] && PACKAGES+=" libseccomp2" || true
+[ "$APPARMOR" = "yes" ] && PACKAGES+=" apparmor" || true

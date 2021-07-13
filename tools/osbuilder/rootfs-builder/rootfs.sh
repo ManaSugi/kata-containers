@@ -24,6 +24,7 @@ KERNEL_MODULES_DIR=${KERNEL_MODULES_DIR:-""}
 OSBUILDER_VERSION="unknown"
 DOCKER_RUNTIME=${DOCKER_RUNTIME:-runc}
 GO_VERSION="null"
+APPARMOR=${APPARMOR:-"no"}
 export GOPATH=${GOPATH:-${HOME}/go}
 LIBC=${LIBC:-musl}
 
@@ -106,6 +107,9 @@ AGENT_SOURCE_BIN    Path to the directory of agent binary.
 
 AGENT_VERSION       Version of the agent to include in the rootfs.
                     Default value: ${AGENT_VERSION:-<not set>}
+
+APPARMOR            When set to "yes", the kata-agent is built with apparmor capability.
+                    Default value: "no"
 
 DISTRO_REPO         Use host repositories to install guest packages.
                     Default value: <not set>
@@ -441,6 +445,7 @@ build_rootfs_distro()
 			--env OSBUILDER_VERSION="${OSBUILDER_VERSION}" \
 			--env INSIDE_CONTAINER=1 \
 			--env SECCOMP="${SECCOMP}" \
+			--env APPARMOR="${APPARMOR}" \
 			--env DEBUG="${DEBUG}" \
 			--env STAGE_PREPARE_ROOTFS=1 \
 			--env HOME="/root" \
@@ -587,7 +592,7 @@ EOT
 			git checkout "${AGENT_VERSION}" && OK "git checkout successful" || die "checkout agent ${AGENT_VERSION} failed!"
 		fi
 		make clean
-		make LIBC=${LIBC} INIT=${AGENT_INIT}
+		make LIBC=${LIBC} INIT=${AGENT_INIT} APPARMOR=${APPARMOR}
 		make install DESTDIR="${ROOTFS_DIR}" LIBC=${LIBC} INIT=${AGENT_INIT} SECCOMP=${SECCOMP}
 		[ "$ARCH" == "aarch64" ] && export PATH=$OLD_PATH && rm -rf /usr/local/musl
 		popd
