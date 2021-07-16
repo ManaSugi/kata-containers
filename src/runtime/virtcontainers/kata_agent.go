@@ -1412,6 +1412,10 @@ func (k *kataAgent) createContainer(ctx context.Context, sandbox *Sandbox, c *Co
 
 	sharedPidNs := k.handlePidNamespace(grpcSpec, sandbox)
 
+	if !sandbox.config.DisableGuestSeccomp && !sandbox.seccompSupported {
+		return nil, fmt.Errorf("Seccomp profiles are passed to the virtual machine, but the Kata agent does not support seccomp")
+	}
+
 	passSeccomp := !sandbox.config.DisableGuestSeccomp && sandbox.seccompSupported
 
 	// We need to constraint the spec to make sure we're not passing
